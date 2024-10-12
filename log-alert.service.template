@@ -1,0 +1,14 @@
+[Unit]
+Description=Error log monitor for your-app
+After=network.target your-app.service
+Requires=your-app.service
+
+[Service]
+ExecStart=/opt/log-alert/LogAlert
+Restart=always
+User=user
+WorkingDirectory=/opt/log-alert
+EnvironmentFile=/opt/log-alert/.env
+
+[Install]
+WantedBy=multi-user.target

@@ -4,11 +4,11 @@ After=network.target your-app.service
 Requires=your-app.service
 
 [Service]
-ExecStart=/opt/log-alert/LogAlert
+ExecStart=/opt/service-health-monitor/ServiceHealthMonitor
 Restart=always
 User=user
-WorkingDirectory=/opt/log-alert
-EnvironmentFile=/opt/log-alert/.env
+WorkingDirectory=/opt/service-health-monitor
+EnvironmentFile=/opt/service-health-monitor/.env
 
 [Install]
 WantedBy=multi-user.target

@@ -1,11 +1,11 @@
-# DotNet App Health Monitor
+# DotNet App Service Health Monitor
 
 ## Overview
 This .NET 8 application monitors specified services and sends alerts to a Telegram chat if any services are down. Additionally, it pings a health checks URL to ensure system health.
 
 ## Prerequisites
 - [.NET SDK 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
-- **Environment Variables** (add these to an `.env` file in `/opt/log-alert/.env` or your shell configuration file):
+- **Environment Variables** (add these to an `.env` file in `/opt/service-health-monitor/.env` or your shell configuration file):
   - `BOT_TOKEN`: Token for your Telegram bot.
   - `CHAT_ID`: Telegram chat ID for receiving alerts.
   - `HEALTHCHECKS_URL`: URL endpoint for health checks.
@@ -28,17 +28,17 @@ This .NET 8 application monitors specified services and sends alerts to a Telegr
 3. **Create systemd Service**:
     Configure the systemd service to manage the application:
     ```bash
-    sudo cp log-alert.service.template /etc/systemd/system/log-alert.service
+    sudo cp service-health-monitor.service.template /etc/systemd/system/service-health-monitor.service
     sudo systemctl daemon-reload
-    sudo systemctl enable --now log-alert.service
+    sudo systemctl enable --now service-health-monitor.service
     ```
 
 ## Usage
 
 To manage the application as a systemd service, use the following commands:
-- **Start Service**: `sudo systemctl start log-alert.service`
-- **Stop Service**: `sudo systemctl stop log-alert.service`
-- **Check Service Status**: `sudo systemctl status log-alert.service`
+- **Start Service**: `sudo systemctl start service-health-monitor.service`
+- **Stop Service**: `sudo systemctl stop service-health-monitor.service`
+- **Check Service Status**: `sudo systemctl status service-health-monitor.service`
 
 ## Code Explanation
 

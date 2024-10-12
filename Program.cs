@@ -8,7 +8,7 @@ class Program
     private static readonly string botToken = Environment.GetEnvironmentVariable("BOT_TOKEN") ?? throw new ArgumentNullException("BOT_TOKEN environment variable is not set.");
     private static readonly string chatId = Environment.GetEnvironmentVariable("CHAT_ID") ?? throw new ArgumentNullException("CHAT_ID environment variable is not set.");
     private static readonly string healthchecksUrl = Environment.GetEnvironmentVariable("HEALTHCHECKS_URL") ?? throw new ArgumentNullException("HEALTHCHECKS_URL environment variable is not set.");
-    private static readonly string[] services = { "your-app", "error-log-monitor" };
+    private static readonly string[] services = Environment.GetEnvironmentVariable("SERVICES")?.Split(',') ?? throw new ArgumentNullException("SERVICES environment variable is not set.");
 
     static async Task Main(string[] args)
     {

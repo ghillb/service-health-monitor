@@ -22,26 +22,32 @@ jobs:
         run: dotnet restore
 
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build ServiceHealthMonitor.csproj --configuration Release --no-restore
 
       - name: Publish
-        run: dotnet publish --configuration Release --no-restore --output ./publish
+        run: dotnet publish ServiceHealthMonitor.csproj --configuration Release --no-restore --output ./publish
 
       - name: Archive production artifacts
+        run: zip -r service-health-monitor.zip ./publish
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: service-health-monitor
-          path: ./publish
+          path: service-health-monitor.zip
 
   release:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Download artifact
         uses: actions/download-artifact@v3
         with:
           name: service-health-monitor
-          path: ./publish
+          path: .
 
       - name: Create GitHub Release
         id: create_release
@@ -50,9 +56,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ github.run_number }}
-          release_name: Release ${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
           draft: false
           prerelease: false
+
+      - name: Set release URL
+        run: echo "RELEASE_UPLOAD_URL=${{ steps.create_release.outputs.upload_url }}" >> $GITHUB_ENV
 
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
@@ -60,6 +69,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./publish
+          asset_path: service-health-monitor.zip
           asset_name: service-health-monitor.zip
           asset_content_type: application/zip

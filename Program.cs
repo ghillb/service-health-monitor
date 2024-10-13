@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 class Program
 {
@@ -10,8 +11,21 @@ class Program
     private static readonly string healthchecksUrl = Environment.GetEnvironmentVariable("HEALTHCHECKS_URL") ?? throw new ArgumentNullException("HEALTHCHECKS_URL environment variable is not set.");
     private static readonly string[] services = Environment.GetEnvironmentVariable("SERVICES")?.Split(',') ?? throw new ArgumentNullException("SERVICES environment variable is not set.");
 
+    private static readonly ILogger<Program> logger;
+
+    static Program()
+    {
+        using var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder.AddConsole();
+        });
+        logger = loggerFactory.CreateLogger<Program>();
+    }
+
     static async Task Main(string[] args)
     {
+        logger.LogInformation("Application started.");
+
         var downServices = CheckServices();
 
         if (downServices.Length > 0)
@@ -25,6 +39,8 @@ class Program
         }
 
         await PingHealthchecks();
+
+        logger.LogInformation("Application finished.");
     }
 
     private static string[] CheckServices()
@@ -36,6 +52,11 @@ class Program
             if (!IsServiceActive(service))
             {
                 downServices.Add(service);
+                logger.LogWarning($"Service {service} is down.");
+            }
+            else
+            {
+                logger.LogInformation($"Service {service} is active.");
             }
         }
 
@@ -75,6 +96,7 @@ class Program
             });
 
             await client.PostAsync(url, content);
+            logger.LogInformation("Sent Telegram message.");
         }
     }
 
@@ -83,7 +105,16 @@ class Program
         using (var client = new HttpClient())
         {
             client.Timeout = TimeSpan.FromSeconds(10);
-            await client.GetAsync(healthchecksUrl);
+            try
+            {
+                var response = await client.GetAsync(healthchecksUrl);
+                response.EnsureSuccessStatusCode();
+                logger.LogInformation($"Successfully pinged healthchecks URL: {healthchecksUrl}");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"Failed to ping healthchecks URL: {healthchecksUrl}. Exception: {ex.Message}");
+            }
         }
     }
 }
